@@ -3,31 +3,30 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { RouteNames } from "../constants";
 import IgraService from "../services/IgraService";
 import { useEffect, useState } from "react";
+import ZanrService from "../services/ZanrService";
 
 export default function IgrePromjena() {
   const navigate = useNavigate();
   const [igra, setIgra] = useState({});
-  const { sifra } = useParams();
+  const [zanrovi, setZanrovi] = useState([]);
+  const { id } = useParams();
 
-  async function dohvatiIgru() {
-    //const odgovor = await IgraService.getBySifra(sifra);
-    //setIgra(odgovor);
-    setIgra({
-      sifra: 1,
-      naslov: "Igra 1",
-      opis: "Opis igre 1",
-      hltb: "10",
-      platforme: "PC, PS5",
-      kategorija: "Akcija",
-      url: "https://placehold.co/600x400?text=No+Image+Yet",
-      trailer: "https://www.youtube.com/watch?v=lANt7oJhFvU",
-      datumIzdavanja: "2022-01-01",
+  function dohvatiIgru(id) {
+    debugger;
+    
+    IgraService.getBySifra(id).then((odgovor) => {
+
+      ZanrService.get(id).then((zanrovi) => {
+        setZanrovi(zanrovi);
+        odgovor.kategorija = zanrovi.filter((z) => z.id === odgovor.idZanra)[0].imeZanra;
+      });
+      setIgra(odgovor);
     });
   }
 
   useEffect(() => {
-    dohvatiIgru();
-  }, []);
+    dohvatiIgru(id);
+  }, [id]);
 
   async function promjeni(igra) {
     const odgovor = await IgraService.promjeni(igra);
@@ -43,16 +42,15 @@ export default function IgrePromjena() {
     e.preventDefault(); //nemoj odraditi zahtjev na server na standardni način
 
     let podatci = new FormData(e.target);
-
     promjeni({
       naslov: podatci.get("naslov"),
       opis: podatci.get("opis"),
       hltb: podatci.get("hltb"),
       platforme: podatci.get("platforme"),
-      zanr: podatci.get("kategorija"),
-      datumIzdavanja: get("datumIzdavanja"),
-      url: get("url"),
-      trailer: get("trailer"),
+      idZanra: zanrovi.filter((z) => z.imeZanra === podatci.get("kategorija"))[0].id,
+      datumIzdavanja: podatci.get("datumIzdavanja"),
+      urlSlike: podatci.get("url"),
+      trailer: podatci.get("trailer"),
     });
   }
 
@@ -112,7 +110,7 @@ export default function IgrePromjena() {
 
         <Form.Group controlId="url">
           <Form.Label>URL slike</Form.Label>
-          <Form.Control type="text" name="url" defaultValue={igra.url} />
+          <Form.Control type="text" name="url" defaultValue={igra.urlSlike} />
         </Form.Group>
 
         <Form.Group controlId="trailer">

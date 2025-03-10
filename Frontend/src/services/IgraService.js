@@ -1,15 +1,15 @@
 import { HttpService } from "./HttpService";
 
 async function get() {
-  return await HttpService.get("/igre")
+  return await HttpService.get("/igre/DohvatiSveIgre")
     .then((odgovor) => {
       return odgovor.data;
     })
     .catch((e) => {});
 }
 
-async function getBySifra(sifra) {
-  return await HttpService.get("/igre/" + sifra)
+async function getBySifra(id) {
+  return await HttpService.get(`/igre/DohvatiIgru?idIgre=${id}`)
     .then((odgovor) => {
       return odgovor.data;
     })
@@ -17,7 +17,7 @@ async function getBySifra(sifra) {
 }
 
 async function dodaj(igre) {
-  return HttpService.post("/igre", igre)
+  return HttpService.post("/igre/DodajIgru", igre)
     .then(() => {
       return { greska: false, poruka: "Dodano" };
     })
@@ -26,8 +26,8 @@ async function dodaj(igre) {
     });
 }
 
-async function promjeni(sifra, igre) {
-  return HttpService.post("/igre/update/" + sifra, igre)
+async function promjeni(id, igre) {
+  return HttpService.post("/igre/updateIgru", igre)
     .then(() => {
       return { greska: false, poruka: "Dodano" };
     })
@@ -36,8 +36,8 @@ async function promjeni(sifra, igre) {
     });
 }
 
-async function obrisi(sifra, igre) {
-  return HttpService.delete("/igre/" + sifra, igre)
+async function obrisi(id) {
+  return HttpService.delete(`/igre/obrisiIgru?id=${id}`)
     .then(() => {
       return { greska: false, poruka: "Obrisano" };
     })

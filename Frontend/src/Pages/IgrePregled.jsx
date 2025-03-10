@@ -3,6 +3,7 @@ import IgraService from "../services/IgraService";
 import { Button, Table } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { RouteNames } from "../constants";
+import ZanrService from "../services/ZanrService";
 
 export default function IgrePregled() {
   const [igre, setIgre] = useState();
@@ -10,52 +11,29 @@ export default function IgrePregled() {
   const navigate = useNavigate();
 
   async function dohvatiIgre() {
+    const zanrovi = await ZanrService.get();
     const odgovor = await IgraService.get();
+    odgovor.forEach((igra) => {
+      igra.kategorija = (zanrovi.length == 0 ? [] : zanrovi.find((z) => z.id === igra.idZanra).imeZanra);
+    }
+    );
     setIgre(odgovor);
   }
 
-  function obrisiIgru(sifra) {
-    const odgovor = IgraService.obrisi(sifra);
+  function obrisiIgru(id) {
+    const odgovor = IgraService.obrisi(id);
     if (odgovor.greska) {
       alert("Greška kod brisanja igre");
       setIsLoading(false);
       return;
     }
     setIsLoading(false);
-    //dohvatiIgre();
-    //setIgre(igre.filter((igra) => igra.sifra !== sifra)); //Only for mock data
+    window.location.reload();
   }
 
   //hooks (kuka) se izvodi prilikom dolaska na stranicu igre
   useEffect(() => {
-    //dohvatiIgre();
-    const mockIgre = [
-      {
-        naslov: "Igra 1",
-        hltb: "10",
-        platforme: "PC, PS5",
-        kategorija: "Akcija",
-        datumIzdavanja: "2022-01-01",
-        sifra: 1,
-      },
-      {
-        naslov: "Igra 2",
-        hltb: "20",
-        platforme: "Xbox, PC",
-        kategorija: "Avantura",
-        datumIzdavanja: "2021-05-15",
-        sifra: 2,
-      },
-      {
-        naslov: "Igra 3",
-        hltb: "15",
-        platforme: "Switch",
-        kategorija: "RPG",
-        datumIzdavanja: "2020-11-20",
-        sifra: 3,
-      },
-    ];
-    setIgre(mockIgre);
+    dohvatiIgre();
   }, []);
 
   return (
@@ -82,25 +60,25 @@ export default function IgrePregled() {
           {igre &&
             igre.map((igra, index) => (
               <tr key={index}>
-                <td onClick={() => navigate(`/igre/${igra.sifra}`)}>
+                <td onClick={() => navigate(`/igre/${igra.id}`)}>
                   {igra.naslov}
                 </td>
-                <td onClick={() => navigate(`/igre/${igra.sifra}`)}>
+                <td onClick={() => navigate(`/igre/${igra.id}`)}>
                   {igra.hltb}
                 </td>
-                <td onClick={() => navigate(`/igre/${igra.sifra}`)}>
+                <td onClick={() => navigate(`/igre/${igra.id}`)}>
                   {igra.platforme}
                 </td>
-                <td onClick={() => navigate(`/igre/${igra.sifra}`)}>
+                <td onClick={() => navigate(`/igre/${igra.id}`)}>
                   {igra.kategorija}
                 </td>
-                <td onClick={() => navigate(`/igre/${igra.sifra}`)}>
+                <td onClick={() => navigate(`/igre/${igra.id}`)}>
                   {igra.datumIzdavanja}
                 </td>
                 <td style={{ display: "flex", gap: "10px" }}>
                   <Button
                     style={{ backgroundColor: "#4CAF50", color: "white" }}
-                    onClick={() => navigate(`/igre/update/${igra.sifra}`)}
+                    onClick={() => navigate(`/igre/update/${igra.id}`)}
                   >
                     Ažuriranje
                   </Button>
@@ -109,7 +87,7 @@ export default function IgrePregled() {
                     style={{ backgroundColor: "#f44336", color: "white" }}
                     onClick={() => {
                       setIsLoading(true);
-                      obrisiIgru(igra.sifra);
+                      obrisiIgru(igra.id);
                     }}
                     disabled={isLoading}
                   >
